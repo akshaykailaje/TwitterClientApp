@@ -5,6 +5,7 @@
         android:orderInCategory="100"
         android:showAsAction="ifRoom"
         android:onClick="onComposeAction"
-        android:title="@string/compose_tweet" />
+        android:title="@string/compose_tweet"
+        android:icon="@drawable/twitter_compose" />
 
 </menu>

@@ -25,18 +25,28 @@ public class ComposeActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_compose);
-		
+		DBManager.logTableSize();
 		User currentUser = (User) getIntent().getSerializableExtra("currentUser");
-		if (currentUser != null) {
+		if (currentUser == null) {
+			cancelRequest("Current user details could not be retrieved. Please try again later.");
+		} else {
 			ImageView imageView = (ImageView) findViewById(R.id.ivComposeProfile);
 			ImageLoader.getInstance().displayImage(currentUser.getProfileImageUrl(), imageView);
-			
+
 			TextView tvFullName = (TextView) findViewById(R.id.tvFullName);
 			tvFullName.setText(Html.fromHtml("<b>" + currentUser.getName() + "</b>"));
-			
+
 			TextView tvHandle = (TextView) findViewById(R.id.tvHandle);
 			tvHandle.setText(Html.fromHtml("<font color='#777777'>@" + currentUser.getScreenName() + "</font>"));
 		}
+		
+	}
+	
+	private void cancelRequest(String msg) {
+		Intent i = new Intent();
+		i.putExtra("errorMessage", msg);
+		setResult(RESULT_CANCELED, i);
+		finish();
 	}
 
 	@Override
@@ -58,7 +68,7 @@ public class ComposeActivity extends Activity {
 			@Override
 			public void onSuccess(JSONObject jsonResponse) {
 				// post successful, create tweet object and return
-				Tweet tweet = Tweet.fromJson(jsonResponse);
+				Tweet tweet = new Tweet(jsonResponse);
 				
 				Intent i = new Intent();
 				i.putExtra("composedTweet", tweet);
@@ -69,7 +79,7 @@ public class ComposeActivity extends Activity {
 			@Override
 			public void onFailure(Throwable t, JSONObject responseObject) {
 				Log.e("ERROR", "Error posting tweet", t);
-				Toast.makeText(getApplicationContext(), "Post failed. Try again after some time", Toast.LENGTH_LONG).show();
+				cancelRequest("Could not post tweet. Please try again later.");
 			}
 			
 		});
